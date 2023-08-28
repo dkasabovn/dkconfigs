@@ -13,6 +13,7 @@ Plug 'hrsh7th/cmp-vsnip'
 Plug 'hrsh7th/cmp-path'
 Plug 'hrsh7th/cmp-buffer'
 Plug 'hrsh7th/vim-vsnip'
+Plug 'L3MON4D3/LuaSnip', {'tag': 'v2.*', 'do': 'make install_jsregexp'}
 Plug 'nvim-treesitter/nvim-treesitter'
 
 Plug 'airblade/vim-rooter'
@@ -29,79 +30,8 @@ Plug 'jvirtanen/vim-hcl'
 Plug 'RRethy/nvim-base16'
 call plug#end()
 
-
-lua <<EOF
-vim.cmd('colorscheme base16-bright')
-
-local nvim_lsp = require'lspconfig'
-local cmp = require'cmp'
-cmp.setup({
-  -- Enable LSP snippets
-  snippet = {
-    expand = function(args)
-        vim.fn["vsnip#anonymous"](args.body)
-    end,
-  },
-  mapping = {
-    ['<C-p>'] = cmp.mapping.select_prev_item(),
-    ['<C-n>'] = cmp.mapping.select_next_item(),
-    -- Add tab support
-    ['<S-Tab>'] = cmp.mapping.select_prev_item(),
-    ['<Tab>'] = cmp.mapping.select_next_item(),
-    ['<C-d>'] = cmp.mapping.scroll_docs(-4),
-    ['<C-f>'] = cmp.mapping.scroll_docs(4),
-    ['<C-Space>'] = cmp.mapping.complete(),
-    ['<C-e>'] = cmp.mapping.close(),
-    ['<CR>'] = cmp.mapping.confirm({
-      behavior = cmp.ConfirmBehavior.Insert,
-      select = true,
-    })
-  },
-
-  -- Installed sources
-  sources = {
-    { name = 'nvim_lsp' },
-    { name = 'vsnip' },
-    { name = 'path' },
-    { name = 'buffer' },
-  },
-})
-
-require 'go'.setup({
-  goimport = 'gopls', -- if set to 'gopls' will use golsp format
-  gofmt = 'gopls', -- if set to gopls will use golsp format
-  max_line_len = 120,
-  tag_transform = false,
-  test_dir = '',
-  comment_placeholder = '   ',
-  lsp_cfg = true, -- false: use your own lspconfig
-  lsp_gofumpt = true, -- true: set default gofmt in gopls format to gofumpt
-  lsp_on_attach = true, -- use on_attach from go.nvim
-  dap_debug = true,
-})
-
-local protocol = require'vim.lsp.protocol'
-
--- Run gofmt + goimport on save
-vim.api.nvim_exec([[ autocmd BufWritePre *.go :silent! lua require('go.format').goimport() ]], false)
-
-nvim_lsp['pyright'].setup {
-	on_attach = on_attach,
-}
-
--- Ccls setup
-nvim_lsp.ccls.setup {
-  init_options = {
-	  compilationDatabaseDirectory = "build";
-	  index = {
-		  threads = 0;
-	  };
-	  clang = {
-		  excludeArgs = { "-frounding-math" };
-	  };
-  }
-}
-EOF
+lua require('global')
+lua require('clangd')
 
 imap <silent><script><expr> <C-J> copilot#Accept("\<CR>")
 let g:copilot_no_tab_map = v:true
